@@ -10,9 +10,25 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
+
+type Lines [][]int
+
+func (l Lines) Len() int { return len(l) }
+func (l Lines) Less(i, j int) bool {
+	for x := range l[i] {
+		if l[i][x] == l[j][x] {
+			continue
+		}
+		return l[i][x] < l[j][x]
+	}
+	return false
+}
+
+func (l *Lines) Swap(i, j int) { (*l)[i], (*l)[j] = (*l)[j], (*l)[i] }
 
 func main() {
 	reader := bufio.NewReaderSize(os.Stdin, 16*1024*1024)
@@ -20,36 +36,39 @@ func main() {
 	str := strings.Split(strings.TrimSpace(readLine(reader)), " ")
 	n, _ := strconv.Atoi(str[0])
 	m, _ := strconv.Atoi(str[1])
-	lines := make([][]int, n)
-	for i := range lines {
-		lines[i] = make([]int, 2)
+	lines := make(Lines, n*2)
+	for i := 0; i < len(lines); i += 2 {
 		strLine := strings.Split(strings.TrimSpace(readLine(reader)), " ")
-		lines[i][0], _ = strconv.Atoi(strLine[0])
-		lines[i][1], _ = strconv.Atoi(strLine[1])
-		// first element must be a start of line
-		if lines[i][1] < lines[i][0] {
-			lines[i][0], lines[i][1] = lines[i][1], lines[i][0]
-		}
+
+		start, _ := strconv.Atoi(strLine[0])
+		end, _ := strconv.Atoi(strLine[1])
+		lines[i] = []int{start, 1}
+		lines[i+1] = []int{end + 1, -1}
 	}
+
+	// nlogn
+	sort.Sort(&lines)
 
 	pointsStr := strings.Split(strings.TrimSpace(readLine(reader)), " ")
 	for i := 0; i < m; i++ {
+		var total int
 		p, _ := strconv.Atoi(pointsStr[i])
-		fmt.Printf("%d ", slow(p, lines))
+		for i := range lines {
+			if p >= lines[i][0] {
+				total += lines[i][1]
+			}
+		}
+		fmt.Printf("%d ", total)
 	}
-	fmt.Println()
-
-	// fmt.Println(lines, points)
 
 }
 
-func slow(k int, a [][]int) (c int) {
+func test(k int, a [][]int) (c int) {
 	for _, el := range a {
 		if el[0] <= k && k <= el[1] {
 			c++
 		}
 	}
-
 	return c
 }
 
