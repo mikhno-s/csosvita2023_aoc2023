@@ -61,12 +61,12 @@ func main() {
 
 		if c[0] == "ENTER" {
 			groupID, _ := strconv.Atoi(c[1])
-			cells.add(groupID - 1)
+			cells.set(groupID-1, 1)
 		}
 
 		if c[0] == "LEAVE" {
 			groupID, _ := strconv.Atoi(c[1])
-			cells.remove(groupID - 1)
+			cells.set(groupID-1, -1)
 		}
 	}
 }
@@ -96,27 +96,15 @@ func (c *Cells) sum(L int, R int) (sum int) {
 	return sum
 }
 
-func (c *Cells) add(i int) {
+func (c *Cells) set(i int, v int) {
 	if len(*c) == 0 {
 		return
 	}
 	groupSize := len((*c)[0].Cells)
 	groupID := i / groupSize
 
-	(*c)[groupID].Cells[i-groupID*groupSize] += 1
-	(*c)[groupID].Sum += 1
-}
-
-func (c *Cells) remove(i int) {
-	if len(*c) == 0 {
-		return
-	}
-	groupSize := len((*c)[0].Cells)
-	groupID := i / groupSize
-
-	(*c)[groupID].Cells[i-groupID*groupSize] -= 1
-	(*c)[groupID].Sum -= 1
-
+	(*c)[groupID].Cells[i-groupID*groupSize] += v
+	(*c)[groupID].Sum += v
 }
 
 func readLine(reader *bufio.Reader) string {

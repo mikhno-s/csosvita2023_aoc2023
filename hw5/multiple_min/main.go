@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -38,17 +39,32 @@ func main() {
 			_rs, _ := strconv.Atoi(r)
 			classes[i] = append(classes[i], _rs)
 		}
+		//N * mlogm
+		sort.Ints(classes[i])
 	}
+
 	fmt.Println(classes)
+	h := &Heap{}
+	min := 1000000000
+	for col := 0; col < len(classes[0]); col++ {
+		for line := 0; line < len(classes); line++ {
+			if col > 0 {
+				h.ExtractByValue(classes[line][col-1])
+			}
 
-}
-
-func (h *Heap) Print() {
-	if h.Size < 1 || len(h.array) < 2 {
-		fmt.Println(h.array[:h.Size])
-	} else {
-		fmt.Println(h.array[1 : h.Size+1])
+			if len(h.array) >= len(classes[0]) {
+				if min > h.array[1]-h.array[len(h.array)-1] {
+					min = h.array[1] - h.array[len(h.array)-1]
+					if min < 0 {
+						min *= -1
+					}
+				}
+			}
+			fmt.Println(min, h)
+			h.Insert(classes[line][col])
+		}
 	}
+	fmt.Println(min)
 
 }
 

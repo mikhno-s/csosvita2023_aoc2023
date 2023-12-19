@@ -12,23 +12,25 @@ import (
 type Heap struct {
 	Size  int
 	array []int
+	// add map with the [element]index of element
+	m map[int]int
 }
 
 func main() {
 
-	// fi, err := os.Open("input")
-	// if err != nil {
-	// 	panic(err)
-	// }
+	fi, err := os.Open("input")
+	if err != nil {
+		panic(err)
+	}
 
-	// defer func() {
-	// 	if err := fi.Close(); err != nil {
-	// 		panic(err)
-	// 	}
-	// }()
-	// reader := bufio.NewReader(fi)
+	defer func() {
+		if err := fi.Close(); err != nil {
+			panic(err)
+		}
+	}()
+	reader := bufio.NewReader(fi)
 
-	reader := bufio.NewReaderSize(os.Stdin, 16*1024*1024)
+	// reader := bufio.NewReaderSize(os.Stdin, 16*1024*1024)
 
 	qN, _ := strconv.Atoi(readLine(reader))
 
@@ -56,26 +58,22 @@ func main() {
 }
 
 func (h *Heap) Print() {
-	if h.Size < 1 || len(h.array) < 2 {
-		fmt.Println(h.array[:h.Size])
-	} else {
-		fmt.Println(h.array[1 : h.Size+1])
-	}
-
+	fmt.Println(h.array[:h.Size])
 }
 
 func (h *Heap) Min() int {
-	if h.Size < 1 || len(h.array) < 2 {
+	if h.Size < 1 {
 		return 0
 	}
-	return h.array[1]
+	return h.array[0]
 }
 
 func (h *Heap) ExtractByValue(v int) {
-	for i := 1; i <= h.Size && i < len(h.array); i++ {
+	for i := 0; i < h.Size; i++ {
+		// add map to quickly found the index of element
 		if h.array[i] == v {
-			h.array[i], h.array[h.Size] = h.array[h.Size], h.array[i]
 			h.Size -= 1
+			h.array[i], h.array[h.Size] = h.array[h.Size], h.array[i]
 			h.siffDown(i)
 			break
 		}
@@ -84,40 +82,46 @@ func (h *Heap) ExtractByValue(v int) {
 
 func (h *Heap) Insert(v int) {
 	if h.Size == 0 {
-		h.array = make([]int, 2)
+		h.array = make([]int, 0)
+		h.m = make(map[int]int)
 	}
 
-	h.Size += 1
 	if h.Size >= len(h.array) {
 		h.array = append(h.array, v)
+		h.Size += 1
 	} else {
-		h.array[h.Size] = v
+		h.array[h.Size-1] = v
 	}
-	h.siffUp(h.Size)
+
+	h.siffUp(h.Size - 1)
+
 }
 
 func (h *Heap) siffUp(i int) {
-	for i > 1 && h.array[i/2] > h.array[i] {
+	for i > 0 && h.array[i/2] > h.array[i] {
 		h.array[i/2], h.array[i] = h.array[i], h.array[i/2]
+		h.m[i/2] = h.array[i/2]
+		h.m[i] = h.array[i]
 		i = i / 2
 	}
 }
 
 func (h *Heap) siffDown(i int) {
-	for 2*i <= h.Size {
+	for h.Size > 0 && 2*i+1 < h.Size {
 		j := i
 
-		if h.array[2*i] < h.array[j] {
-			j = 2 * i
+		if h.array[2*i+1] < h.array[j] {
+			j = 2*i + 1
 		}
 
-		if 2*i+1 <= h.Size && h.array[2*i+1] < h.array[j] {
-			j = 2*i + 1
+		if 2*i+2 < h.Size && h.array[2*i+2] < h.array[j] {
+			j = 2*i + 2
 		}
 
 		if j == i {
 			break
 		}
+
 		h.array[i], h.array[j] = h.array[j], h.array[i]
 		i = j
 	}
