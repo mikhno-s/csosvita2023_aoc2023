@@ -11,6 +11,22 @@ import (
 	"strings"
 )
 
+// 56. Merge Intervals
+
+// Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.
+
+// Example:
+
+// Input: intervals = [[1,3],[2,6],[8,10],[15,18]]
+// Output: [[1,6],[8,10],[15,18]]
+// Explanation: Since intervals [1,3] and [2,6] overlap, merge them into [1,6].
+
+// Constraints:
+
+// 1 <= intervals.length <= 104
+// intervals[i].length == 2
+// 0 <= starti <= endi <= 104
+
 type intervals [][]int
 
 func (l intervals) Len() int { return len(l) }
@@ -42,6 +58,7 @@ func main() {
 
 	intervals := make([][]int, 0)
 	fmt.Println(reflect.TypeOf(intervals))
+	// Reading intervals from an input file
 	for s := readLine(reader); s != ""; s = readLine(reader) {
 		strLine := strings.Split(s, " ")
 		start, _ := strconv.Atoi(strLine[0])
@@ -49,6 +66,7 @@ func main() {
 		intervals = append(intervals, []int{start, end})
 	}
 
+	// Sorting intervals by start and finish
 	sort.Slice(intervals, func(i, j int) bool {
 		for x := range intervals[i] {
 			if intervals[i][x] == intervals[j][x] {
@@ -63,12 +81,14 @@ func main() {
 
 	L, R := 0, 1
 
+	// Adding the very first interval to result
 	if len(intervals) > 0 {
 		result = append(result, []int{intervals[L][0], intervals[L][1]})
 	}
 
+	// Start from the second interval
 	for ; R < len(intervals); R += 1 {
-		// start of second line earlier than finish of line before
+		// Check if start of next interval is a part of previous interval by checking that start_i <= finish_i-1
 		if intervals[R][0] <= result[L][1] {
 			if intervals[R][1] > result[L][1] {
 				result[L][1] = intervals[R][1]
